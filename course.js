@@ -1,14 +1,16 @@
 const request = require('request');//http请求
 const cheerio = require('cheerio');//dom选择
 const iconv = require('iconv-lite');//gbk解码
-const info = require('./info.json');//选课信息
+const infos = require('./infos.json');//选课信息
 
-var stuid = info.stuid;//教务系统账号
-var pwd = info.pwd;//教务系统密码
-var p_qxrxk = info.p_qxrxk;//课程号
-var p_qxrxk_kxh = info.p_qxrxk_kxh;//课序号
+/**
+  info.stuid;//教务系统账号
+  info.pwd;//教务系统密码
+  info.kch;//课程号
+  info.kxh;//课序号
+**/
 
-const login = () => {
+const login = (stuid, pwd) => {
   return new Promise((resolve, reject) => {
     request
       .defaults({ jar: true })
@@ -22,7 +24,7 @@ const login = () => {
       })
       .on('data', function(data) {
         if (data.length != 1) {
-          data = iconv.decode(data, 'gb2312');
+          data = iconv.decode(data, 'gbk');
           $ = cheerio.load(data);
           console.log($('body').text())
         }
@@ -33,14 +35,14 @@ const login = () => {
   });
 };
 
-const course = () => {
+const course = (kch, kxh) => {
   return new Promise((resolve, reject) => {
     request
       .defaults({ jar: true })
       .post('http://202.113.80.18:7777/pls/wwwbks/xk.CourseInput')
       .form({
-        "p_qxrxk": p_qxrxk,
-        "p_qxrxk_kxh": p_qxrxk_kxh
+        "p_qxrxk": kch,
+        "p_qxrxk_kxh": kxh
       })
       .on('data', function(data) {
         data = iconv.decode(data, 'gb2312');
@@ -52,21 +54,23 @@ const course = () => {
   });
 };
 
-const repeatLogin = (i) => {
-  console.log('第'+ i +'次尝试登录')
-  login()
+const repeatLogin = (i, stuid, pwd, kch, kxh) => {
+  console.log(stuid +' 第'+ i +'次尝试登录')
+  login(stuid, pwd)
     .then((status) => {
-      status === 302 ? repeatCourse(1) : repeatLogin(i+1)
+      status === 302 ? repeatCourse(1, kch, kxh) : repeatLogin(i+1, stuid, pwd)
     })
 }
 
-const repeatCourse = (i) => {
-  console.log('第'+ i +'次尝试选课')
-  course()
+const repeatCourse = (i, kch, kxh) => {
+  console.log('第'+ i +'次尝试选课 '+ kch)
+  course(kch, kxh)
     .then((data) => {
       $ = cheerio.load(data);
       true ? console.log($('.t').text()) : repeatCourse(i+1);//判断选课是否成功，未完成
     })
 }
 
-repeatLogin(1)
+infos.map((info)=>{
+  repeatLogin(1, info.stuid, info.pwd, info.kch, info.kxh)
+})
