@@ -22,13 +22,6 @@ const login = (stuid, pwd, jar) => {
       .on('response', function(response) {
         resolve(response.statusCode)
       })
-      .on('data', function(data) {
-        if (data.length != 1) {
-          data = iconv.decode(data, 'gbk');
-          $ = cheerio.load(data);
-          console.log($('body').text())
-        }
-      })
       .on('error', function(err) {
         reject(err)
       })
@@ -58,7 +51,7 @@ const repeatLogin = (index, i, stuid, pwd, kch, kxh, jar) => {
   console.log(stuid +' 第'+ index +'-'+ i +'次尝试登录')
   login(stuid, pwd, jar)
     .then((status) => {
-      status === 302 ? repeatCourse(index, i, kch, kxh, jar) : false
+      status === 302 ? repeatCourse(index, i, kch, kxh, jar) : console.log(status)
     })
 }
 
@@ -78,7 +71,7 @@ infos.map((info,index)=>{
   i[index] = 1;
   j[index] = request.jar()
   setInterval(()=>{
-    repeatLogin(index, i[index], info.stuid, info.pwd, info.kch, info.kxh, j[index])
+    repeatLogin(index+1, i[index], info.stuid, info.pwd, info.kch, info.kxh, j[index])
     i[index]++
-  },1000)
+  },20000)
 })
