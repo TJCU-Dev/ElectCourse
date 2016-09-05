@@ -5,7 +5,8 @@
   "main": "course.js",
   "scripts": {
     "start": "node ./course",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node ./test.js ck",
+    "test1": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "F-loat",
   "license": "MIT",

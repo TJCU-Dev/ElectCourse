@@ -2,7 +2,7 @@ const request = require('request');//http请求
 const cheerio = require('cheerio');//dom选择
 const iconv = require('iconv-lite');//gbk解码
 const infos = require('./infos.json');//选课信息
-
+const xk_list = require('./list.js');
 /**
   info.stuid;//教务系统账号
   info.pwd;//教务系统密码
@@ -39,6 +39,7 @@ const course = (kch, kxh, jar) => {
       })
       .on('data', function(data) {
         data = iconv.decode(data, 'gb2312');
+          console.log(xk_list(data));
         resolve(data)
       })
       .on('error', function(err) {
@@ -73,5 +74,5 @@ infos.map((info,index)=>{
   setInterval(()=>{
     repeatLogin(index+1, i[index], info.stuid, info.pwd, info.kch, info.kxh, j[index])
     i[index]++
-  },20000)
+  },10000)
 })
