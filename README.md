@@ -23,3 +23,6 @@
 npm install 安装依赖包
 
 npm start 执行脚本 等待结果
+
+##Bugs:
+尚未添加选课成功的判断，需手动停止

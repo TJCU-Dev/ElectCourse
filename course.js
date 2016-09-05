@@ -55,8 +55,8 @@ const runLogin = (jar, stuid, pwd, courses, i) => {
   login(jar, stuid, pwd)
     .then((status) => {
       if(status === 302) {
-        console.log('登录成功')
-        console.log('cookie信息：'+ jar)
+        console.log('登录成功，cookie信息：')
+        console.log(jar)
         courses.map((course)=>{
           var i = 1;
           var timer = setInterval(() => {
