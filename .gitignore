@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 /node_modules/
 /config/
+=======
+/node_modules/
+./infos.json
+>>>>>>> 31c8490a577cfd925df314f00196e7f4b5f8989d
