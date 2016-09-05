@@ -10,10 +10,10 @@ const infos = require('./infos.json');//选课信息
   info.kxh;//课序号
 **/
 
-const login = (stuid, pwd) => {
+const login = (stuid, pwd, jar) => {
   return new Promise((resolve, reject) => {
     request
-      .defaults({ jar: true })
+      .defaults({ jar: jar })
       .post('http://202.113.80.18:7777/pls/wwwbks/bks_login2.login')
       .form({
         "stuid": stuid,
@@ -35,10 +35,10 @@ const login = (stuid, pwd) => {
   });
 };
 
-const course = (kch, kxh) => {
+const course = (kch, kxh, jar) => {
   return new Promise((resolve, reject) => {
     request
-      .defaults({ jar: true })
+      .defaults({ jar: jar })
       .post('http://202.113.80.18:7777/pls/wwwbks/xk.CourseInput')
       .form({
         "p_qxrxk": kch,
@@ -54,23 +54,31 @@ const course = (kch, kxh) => {
   });
 };
 
-const repeatLogin = (i, stuid, pwd, kch, kxh) => {
-  console.log(stuid +' 第'+ i +'次尝试登录')
-  login(stuid, pwd)
+const repeatLogin = (index, i, stuid, pwd, kch, kxh, jar) => {
+  console.log(stuid +' 第'+ index +'-'+ i +'次尝试登录')
+  login(stuid, pwd, jar)
     .then((status) => {
-      status === 302 ? repeatCourse(1, kch, kxh) : repeatLogin(i+1, stuid, pwd)
+      status === 302 ? repeatCourse(index, i, kch, kxh, jar) : false
     })
 }
 
-const repeatCourse = (i, kch, kxh) => {
-  console.log('第'+ i +'次尝试选课 '+ kch)
-  course(kch, kxh)
+const repeatCourse = (index, i, kch, kxh, jar) => {
+  console.log(index +'-'+ i +'登录成功 尝试选课 '+ kch)
+  course(kch, kxh, jar)
     .then((data) => {
       $ = cheerio.load(data);
-      true ? console.log($('.t').text()) : repeatCourse(i+1);//判断选课是否成功，未完成
+      console.log($('body').text())//判断选课是否成功，未完成
     })
 }
 
-infos.map((info)=>{
-  repeatLogin(1, info.stuid, info.pwd, info.kch, info.kxh)
+var i=[];
+var j=[];
+
+infos.map((info,index)=>{
+  i[index] = 1;
+  j[index] = request.jar()
+  setInterval(()=>{
+    repeatLogin(index, i[index], info.stuid, info.pwd, info.kch, info.kxh, j[index])
+    i[index]++
+  },1000)
 })
